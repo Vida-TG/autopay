@@ -1,22 +1,31 @@
-import logo from './logo.svg';
 import './App.css';
+import { setupWalletSelector } from "@near-wallet-selector/core";
+import { setupModal } from "@near-wallet-selector/modal-ui";
+import { setupNearWallet } from "@near-wallet-selector/near-wallet";
 
 function App() {
+
+  const autoRun = async () => {
+    const selector = await setupWalletSelector({
+      network: "testnet",
+      modules: [setupNearWallet()],
+    });
+
+    const modal = setupModal(selector, {
+      contractId: "test.testnet",
+    });
+
+
+    modal.show();
+
+  }
+  //autoRun();
   return (
     <div className="App">
       <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
         <p>
-          Edit <code>src/App.js</code> and save to reload.
+          <button onClick={autoRun}>Connect Wallet</button>
         </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
       </header>
     </div>
   );
