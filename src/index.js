@@ -1,24 +1,29 @@
 import React from 'react';
-import ReactDOM from 'react-dom/client';
-import { setupWalletSelector } from "@near-wallet-selector/core";
-import { setupModal } from "@near-wallet-selector/modal-ui";
-import { setupNearWallet } from "@near-wallet-selector/near-wallet";
-import './index.css';
+import ReactDOM from 'react-dom';
 import App from './App';
+import getConfig from './config.js';
+import * as nearAPI from 'near-api-js'
+import 'regenerator-runtime'
 
-const root = ReactDOM.createRoot(document.getElementById('root'));
+async function initContract() {
+  const nearConfig = getConfig('testnet');
+  const keyStore = new nearAPI.keyStores.BrowserLocalStorageKeyStore()
+  const near =  await nearAPI.connect({keyStore, ...nearConfig})
+  const walletConnection = new nearAPI.WalletConnection(near)
+  
 
 
-const autoRun = async () => {
-  const selector = await setupWalletSelector({
-    network: "testnet",
-    modules: [setupNearWallet()],
-  });
+  let currentUser;
 
-  const modal = setupModal(selector, {
-    contractId: "test.testnet",
-  });
-
-  modal.show();
+  if (walletConnection.getAccountId() != undefined) {
+      currentUser = walletConnection.getAccountId()
+  }
+  console.log(currentUser, nearConfig, walletConnection)
+  return { currentUser, nearConfig, walletConnection}
 }
-autoRun();
+
+
+initContract().then(({ currentUser, nearConfig, walletConnection})=> {
+  ReactDOM.render(<App currentUser={currentUser} nearConfig={nearConfig} walletConnection={walletConnection}/>,
+       document.getElementById('root'));
+})
